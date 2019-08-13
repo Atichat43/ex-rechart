@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
 
-const data = [
+const newData = [
   {
     name: 'Page A', uv: 4000, pv: 2400, amt: 2400,
   },
@@ -29,25 +29,51 @@ const data = [
 ];
 
 export default class BarCharts extends Component {
+  state = {
+    data: newData,
+    activeIndex: 0,
+  }
+
+  handleClick = () => {
+    const num1 = Math.floor(Math.random() * newData.length - 1) + 1
+    let num2 = null
+    do {
+      num2 = Math.floor(Math.random() * newData.length - 1) + 1
+    } while (num2 === num1)
+
+    const arr = newData.map((item, index) => {
+      if(index === num1) return { ...item, uv: 1000 }
+      if(index === num2) return { ...item, uv: 5000 }
+      return item
+    })
+
+    this.setState(() => ({ data: arr }))
+  }
+
   render() {
+    const { data, activeIndex } = this.state
+
     return (
-      <BarChart
-        className='Bar-chart'
-        width={730} 
-        height={400} 
-        data={data} 
-        margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="pv" fill="#8884d8" />
-        <Bar dataKey="uv" fill="#82ca9d" />
-      </BarChart>
+      <>
+        <button onClick={this.handleClick}> Click </button>
+        <BarChart
+          className='Bar-chart'
+          width={730} 
+          height={400} 
+          data={data} 
+          margin={{
+            top: 5, right: 30, left: 20, bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="pv" fill="#8884d8" />
+          <Bar dataKey="uv" fill="#82ca9d" />
+        </BarChart>
+      </>
     )
   }
 }
