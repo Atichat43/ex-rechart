@@ -23,6 +23,13 @@
   color: #61dafb;
 }
 
+.Bar-chart {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
