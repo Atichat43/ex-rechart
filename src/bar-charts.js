@@ -1,8 +1,23 @@
 
 import React, { Component } from 'react'
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
 } from 'recharts';
+
+import "./bar-charts.css"
+
+const ACTIVE_OPACITY = 1
+const INACTIVE_OPACITY = 0.3
+const PRIMARY_COLOR = "#245080"
+const SECONDARY_COLOR = "#2C7399"
+const INACTIVE = -1
 
 const newData = [
   {
@@ -30,8 +45,24 @@ const newData = [
 
 export default class BarCharts extends Component {
   state = {
+    activeIndex: INACTIVE,
     data: newData,
-    activeIndex: 0,
+    highestIndex1: null,
+    highestIndex2: null,
+  }
+
+  componentDidMount() {
+    this.updateHighestValue(this.state.data)
+  }
+
+  updateHighestValue = arr => {
+    const highestValue1 = arr.map(i => i.uv).reduce((a, b) => a > b ? a : b)
+    const highestValue2 = arr.map(i => i.pv).reduce((a, b) => a > b ? a : b)
+
+    const highestIndex1 = arr.findIndex(i => i.uv === highestValue1)
+    const highestIndex2 = arr.findIndex(i => i.pv === highestValue2)
+
+    this.setState(() => ({ highestIndex1, highestIndex2 }))
   }
 
   handleClick = () => {
@@ -42,38 +73,71 @@ export default class BarCharts extends Component {
     } while (num2 === num1)
 
     const arr = newData.map((item, index) => {
-      if(index === num1) return { ...item, uv: 1000 }
-      if(index === num2) return { ...item, uv: 5000 }
+      if (index === num1) return { ...item, uv: 1000 }
+      if (index === num2) return { ...item, uv: 5000 }
       return item
     })
 
+    this.updateHighestValue(arr)
     this.setState(() => ({ data: arr }))
   }
 
+  handleMouseMove = bar => {
+    const activeIndex = bar.isTooltipActive ? bar.activeTooltipIndex : INACTIVE
+    if (this.state.activeIndex !== activeIndex)
+      this.setState(() => ({ activeIndex }))
+  }
+
+  renderBar = ({ activeIndex, color, data, dataKey, highestIndex }) => (
+    <Bar dataKey={dataKey} fill={color} opacity={INACTIVE_OPACITY}>
+      {data.map((e, index) =>
+        <Cell
+          opacity={
+            (index === activeIndex) ||
+              ((activeIndex === INACTIVE) && (index === highestIndex)) ?
+                ACTIVE_OPACITY : INACTIVE_OPACITY
+          }
+        />
+      )}
+    </Bar>
+  )
+
   render() {
-    const { data, activeIndex } = this.state
+    const { handleClick, handleMouseMove, renderBar } = this
+    const { activeIndex, data, highestIndex1, highestIndex2 } = this.state
 
     return (
-      <>
-        <button onClick={this.handleClick}> Click </button>
-        <BarChart
-          className='Bar-chart'
-          width={730} 
-          height={400} 
-          data={data} 
-          margin={{
-            top: 5, right: 30, left: 20, bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="pv" fill="#8884d8" />
-          <Bar dataKey="uv" fill="#82ca9d" />
-        </BarChart>
-      </>
+      <div className="wrapper-chart">
+        <ResponsiveContainer className='bar-chart' height={400} width="90%">
+          <BarChart
+            data={data}
+            margin={{ top: 5, right: 30, left: 20, bottom: 5, }}
+            onMouseMove={handleMouseMove}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip cursor={{ fill: 'transparent' }} />
+            { renderBar({
+              activeIndex,
+              color: PRIMARY_COLOR,
+              data,
+              dataKey:'uv',
+              highestIndex: highestIndex1,
+            })}
+            { renderBar({
+              activeIndex,
+              color: SECONDARY_COLOR,
+              data,
+              dataKey:'pv',
+              highestIndex: highestIndex2,
+            })}
+          </BarChart>
+        </ResponsiveContainer>
+        <button className="button-chart" onClick={handleClick}>
+          Update Highest Value
+        </button>
+      </div>
     )
   }
 }
