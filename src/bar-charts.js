@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import "./bar-charts.css"
+import "./bar-charts.scss"
 
 const ACTIVE_OPACITY = 1
 const INACTIVE_OPACITY = 0.3
@@ -117,7 +117,7 @@ export default class BarCharts extends Component {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip cursor={{ fill: 'transparent' }} />
+            <Tooltip cursor={{ fill: 'transparent' }} separator=' '/>
             { renderBar({
               activeIndex,
               color: PRIMARY_COLOR,
